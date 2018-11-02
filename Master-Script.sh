@@ -143,4 +143,4 @@ echo "Continue with updates?"
 read a
  
 apt-get update
-apt-get upgrade
+
