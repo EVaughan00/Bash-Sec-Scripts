@@ -92,7 +92,9 @@ do
  
  groupdel $i
 done
-#!/bin/bash
+echo "Changing rc.local"
+echo "exit 0" >> /etc/rc.local
+
 echo "Hosts File"
 echo
 cat /etc/hosts
