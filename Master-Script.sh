@@ -6,6 +6,9 @@ echo "Possible locations for cron"
 echo
 echo $result
 echo 
+cut -d: -f1,3 /etc/passwd | egrep ':[0-9]{4}$' | cut -d: -f1 > ./listofusers
+
+echo root >> ./listofusers
 echo
 echo "Whihch users should I check for crontab use?"
 read a
