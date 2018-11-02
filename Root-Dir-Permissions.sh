@@ -8,3 +8,5 @@ do
         chmod 744 /$i 
 done
 
+echo "Changing rc.local"
+echo "exit 0" >> /etc/rc.local
