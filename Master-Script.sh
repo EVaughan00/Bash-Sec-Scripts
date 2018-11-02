@@ -16,7 +16,7 @@ crontab -u $i -l | grep -v "#"
 done
 
 cd /home
-mal=(hydra john zenmap nmap ripper crack rainbow .mp3 mp3)
+mal=(hydra john zenmap nmap ripper crack rainbow .mp3 mp3 Kismet Freeciv Ophcrack)
 for i in ${mal[@]}
 do
 ls -RA * | grep $i > /home/malware.txt
