@@ -1,33 +1,29 @@
 #!/bin/bash
-
-result=`locate cron`
-echo 
-echo "Possible locations for cron" 
+ mkdir /home/$USER/Documents/Lists
+ 
+echo "Sources.list file contents:"
 echo
-echo $result
+cat /etc/apt/sources.list | grep -v "#"
+
+read Cont
+
+apt-get update -y
+apt-get dist-upgrade -y
+
+apt-get install git -y
+apt-get install vim -y
+
+echo "Cloning more scripts"
 echo 
-cut -d: -f1,3 /etc/passwd | egrep ':[0-9]{4}$' | cut -d: -f1 > ./listofusers
 
-echo root >> ./listofusers
-echo
-echo "Whihch users should I check for crontab use?"
-read a
+cd /$USER/Documents
+mkdir GIT
+cd GIT
+git clone https://github.com/EVaughan00/Bash-Sec-Scripts
 
-for i in $a
-do
-crontab -u $i -l | grep -v "#"
-done
-
-cd /home
-mal=(hydra john zenmap nmap ripper crack rainbow .mp3 mp3 Kismet Freeciv Ophcrack)
-for i in ${mal[@]}
-do
-ls -RA * | grep $i > /home/malware.txt
-find . *"$i" > /home/malwareMore.txt
-done
 echo "Installing clamav"
 echo
-apt-get install clamav
+apt-get install clamav -y
 systemctl stop clamav-freshclam
 freshclam
 echo
@@ -35,7 +31,42 @@ systemctl start clamav-freshclam
 echo "Where would you like clam to scan?"
 read res
 clamscan -i -r --max-scansize=4000M --max-filesize=4000M ~/$res
+echo "Clam is Scanning $res"
+echo "Continue?" 
+read Cont1
+result=`locate cron`
 echo 
+echo "Possible locations for cron" 
+echo
+echo $result > /$USER/Documents/
+echo 
+echo
+echo "Making list of users"
+cut -d: -f1,3 /etc/passwd | egrep ':[0-9]{4}$' | cut -d: -f1 > /home/$USER/Documents/Lists/listofusers
+
+echo root >>/home/$USER/Documents/Lists/listofusers
+echo
+echo "Which users should I check for crontab use? Result will be put in ListofCrons"
+read a
+
+for i in $a
+do
+crontab -u $i -l | grep -v "#" > /home/$USER/Documents/Lists/ListofCrons
+done
+
+echo "Looking for hacking tools and bad files"
+
+cd /home
+mal=(hydra john zenmap nmap ripper crack rainbow .mp3 mp3 Kismet Freeciv Ophcrack)
+for i in ${mal[@]}
+do
+ls -RA * | grep $i > /home/$USER/Documents/Lists/malware.txt
+find . *"$i" > /home/$USER/Documents/Lists/malwareMore.txt
+done
+
+echo 
+echo "Continue?"
+read Cont3
 echo
 echo "installing rkhunter"
 
@@ -55,7 +86,7 @@ sudo echo 0 > /proc/sys/net/ipv4/ip_forward
 
 echo
 
-echo "Dissable IPV6?"
+echo "Dissable IPV6? (Y/N)"
 read YorN
 
 if [ "$YorN" = "Y" ]
@@ -70,26 +101,38 @@ cat /etc/passwd | grep ":0:"
 echo
 echo
 echo "Users that can login"
-#if ! grep nologin /etc/passwd
-echo
 cat /etc/passwd | grep -w "login"
+echo
+echo "Dissable root Login? (Y/N)"
+read YesorNo
+if [ "$YesorNo" = "Y" ]
+then
+	sed -i 's//bin/bash//usr/sbin/nologin/' /etc/Passwd
+else 
+	echo "Canceling"
+fi
+echo 
+
 echo
 echo 
 echo "Sudoers file output"
 cat /etc/sudoers | grep -v "#" 
 echo
 echo 
+
+
 echo "Sudoers directory"
 echo
 ls -al /etc/sudoers.d
 
-echo 
+echo "Continue?"
+read Cont4
 echo
-echo "Which Users Should You Delete?"
+echo "Which Users Should I Delete?"
 
-read a
+read UserDel
 
-for i in $a
+for i in $UserDel
 do
  userdel -r $i
  
@@ -97,7 +140,13 @@ do
 done
 echo "Changing rc.local"
 echo "exit 0" >> /etc/rc.local
-
+echo 
+echo
+echo "rc.local contents"
+cat /etc/rc.local | grep -v "#"
+echo
+echo "Continue?"
+read Cont2
 echo "Hosts File"
 echo
 cat /etc/hosts
@@ -113,20 +162,20 @@ echo
 ss -ln | grep LISTEN | grep -v 127.0
 echo 
 echo 
-#echo "What services should I take note of?"
-#echo
-#read S
-#for i in $S
-#do
-#ss -ln | grep $i > ./Notes.txt
-#done
-#echo
-#echo "Which ports should I block?"
-#read a
-#for port in $a
-#do
-#/sbin/iptables -A INPUT -p tcp --destination-port $port -j DROP
-#done
+echo "What services should I take note of?"
+echo
+read S
+for i in $S
+do
+ss -ln | grep $i > ./Notes.txt
+done
+echo
+echo "Which ports should I block?"
+read PortList
+for port in $PortList
+do
+/sbin/iptables -A INPUT -p tcp --destination-port $port -j DROP
+done
 
 a=("bin" "boot" "dev" "etc" "home" "lib" "lib64" "run" "sbin" "usr" "var" "media" "mnt" "opt" "srv")
 
@@ -135,15 +184,18 @@ do
         echo "Changing permissions for $i"
         chmod 744 /$i 
 done
+echo "dissabling Guest Access (Will also need to restart lightdm)"
+echo
 echo "allow-guest=false" >> /etc/lightdm/lightdm.conf
 restart lightdm
+
+echo "Dissabling ssh root login"
+echo
 sed -i 's/PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
 
+echo "Adding maximum password life"
 
-cat /etc/apt/sources.list | grep -v "#"
 
-echo "Continue with updates?"
-read a
- 
-apt-get update
+
+
 
