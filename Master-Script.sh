@@ -1,10 +1,22 @@
 #!/bin/bash
- mkdir /home/$USER/Documents/Lists
+mkdir /tmp/Lists
+#touch /tmp/Lists/ListofCrons
+#touch /tmp/Lists/malware.txt
+#touch /tmp/Lists/malwareMore.txt
+#touch /tmp/Lists/ListofCronLoc.txt
  
 echo "Sources.list file contents:"
 echo
 cat /etc/apt/sources.list | grep -v "#"
 
+#Manual File Inspection
+gedit /etc/resolv.conf #Make sure Default 8.8.8.8 name server is used 
+gedit /etc/hosts 
+gedit /root/.bashrc
+gedit ~/.bashrc #Check for weird aliases
+visudo
+
+echo "Continue with updating?"
 read Cont
 
 apt-get update -y
@@ -16,7 +28,7 @@ apt-get install vim -y
 echo "Cloning more scripts"
 echo 
 
-cd /$USER/Documents
+cd ~/Documents
 mkdir GIT
 cd GIT
 git clone https://github.com/EVaughan00/Bash-Sec-Scripts
@@ -38,20 +50,20 @@ result=`locate cron`
 echo 
 echo "Possible locations for cron" 
 echo
-echo $result > /$USER/Documents/
+echo $result > /tmp/Lists/ListofCronLoc
 echo 
 echo
 echo "Making list of users"
-cut -d: -f1,3 /etc/passwd | egrep ':[0-9]{4}$' | cut -d: -f1 > /home/$USER/Documents/Lists/listofusers
+cut -d: -f1,3 /etc/passwd | egrep ':[0-9]{4}$' | cut -d: -f1 > /tmp/Lists/listofusers
 
-echo root >>/home/$USER/Documents/Lists/listofusers
+echo root >>/tmp/Lists/listofusers
 echo
 echo "Which users should I check for crontab use? Result will be put in ListofCrons"
 read a
 
 for i in $a
 do
-crontab -u $i -l | grep -v "#" > /home/$USER/Documents/Lists/ListofCrons
+crontab -u $i -l | grep -v "#" > /tmp/Lists/ListofCrons
 done
 
 echo "Looking for hacking tools and bad files"
@@ -60,8 +72,8 @@ cd /home
 mal=(hydra john zenmap nmap ripper crack rainbow .mp3 mp3 Kismet Freeciv Ophcrack)
 for i in ${mal[@]}
 do
-ls -RA * | grep $i > /home/$USER/Documents/Lists/malware.txt
-find . *"$i" > /home/$USER/Documents/Lists/malwareMore.txt
+ls -RA * | grep $i > /tmp/Lists/malware.txt
+find . *"$i" > /tmp/Lists/malwareMore.txt
 done
 
 echo 
@@ -70,7 +82,7 @@ read Cont3
 echo
 echo "installing rkhunter"
 
-apt-get install rkhunter
+apt-get install rkhunter -y
 rkhunter --update
 rkhunter --propupd
 
@@ -147,10 +159,7 @@ cat /etc/rc.local | grep -v "#"
 echo
 echo "Continue?"
 read Cont2
-echo "Hosts File"
-echo
-cat /etc/hosts
-echo 
+
 echo
 echo "Netstat scan"
 echo
@@ -170,22 +179,25 @@ do
 ss -ln | grep $i > ./Notes.txt
 done
 echo
-echo "Which ports should I block?"
-read PortList
-for port in $PortList
-do
-/sbin/iptables -A INPUT -p tcp --destination-port $port -j DROP
-done
+#echo "Which ports should I block?"
+#read PortList
+#for port in $PortList
+#do
+#/sbin/iptables -A INPUT -p tcp --destination-port $port -j DROP
+#done
 
-a=("bin" "boot" "dev" "etc" "home" "lib" "lib64" "run" "sbin" "usr" "var" "media" "mnt" "opt" "srv")
+#a=("bin" "boot" "dev" "etc" "home" "lib" "lib64" "run" "sbin" "usr" "var" "media" "mnt" "opt" "srv")
 
-for i in ${a[@]}
-do
-        echo "Changing permissions for $i"
-        chmod 744 /$i 
-done
+#for i in ${a[@]}
+#do
+  #      echo "Changing permissions for $i"
+ #       chmod 755 /$i 
+#done
+
+echo "Continue?"
+read cont5
 echo "dissabling Guest Access (Will also need to restart lightdm)"
-echo
+
 echo "allow-guest=false" >> /etc/lightdm/lightdm.conf
 restart lightdm
 
