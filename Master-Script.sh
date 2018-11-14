@@ -179,27 +179,27 @@ do
 ss -ln | grep $i > ./Notes.txt
 done
 echo
-#echo "Which ports should I block?"
-#read PortList
-#for port in $PortList
-#do
-#/sbin/iptables -A INPUT -p tcp --destination-port $port -j DROP
-#done
+echo "Which ports should I block?"
+read PortList
+for port in $PortList
+do
+/sbin/iptables -A INPUT -p tcp --destination-port $port -j DROP
+done
 
-#a=("bin" "boot" "dev" "etc" "home" "lib" "lib64" "run" "sbin" "usr" "var" "media" "mnt" "opt" "srv")
+a=("bin" "boot" "dev" "etc" "home" "lib" "lib64" "run" "sbin" "usr" "var" "media" "mnt" "opt" "srv")
 
-#for i in ${a[@]}
-#do
-  #      echo "Changing permissions for $i"
- #       chmod 755 /$i 
-#done
+for i in ${a[@]}
+do
+      echo "Changing permissions for $i"
+      chmod 755 /$i 
+done
 
 echo "Continue?"
 read cont5
 echo "dissabling Guest Access (Will also need to restart lightdm)"
 
-echo "allow-guest=false" >> /etc/lightdm/lightdm.conf
-restart lightdm
+#echo "allow-guest=false" >> /etc/lightdm/lightdm.conf
+#restart lightdm
 
 echo "Dissabling ssh root login"
 echo
