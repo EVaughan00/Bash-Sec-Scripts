@@ -1,9 +1,27 @@
 #!/bin/bash
-mkdir /tmp/Lists
-#touch /tmp/Lists/ListofCrons
-#touch /tmp/Lists/malware.txt
-#touch /tmp/Lists/malwareMore.txt
-#touch /tmp/Lists/ListofCronLoc.txt
+
+
+echo "Ready to start Script? (Y/N)"
+read YN
+if [ "$YN" = "Y" ]
+then
+	Starting()
+else 
+	echo "Canceling"
+fi
+
+
+Starting(){
+	echo "Making Lists in tmp dir" 
+	sleep 5
+	mkdir /tmp/Lists
+	Manual
+}
+
+Manual(){
+	echo "Manual Edits"
+	sleep 5
+}
  
 echo "Sources.list file contents:"
 echo
@@ -198,7 +216,7 @@ echo "Continue?"
 read cont5
 echo "dissabling Guest Access (Will also need to restart lightdm)"
 
-#echo "allow-guest=false" >> /etc/lightdm/lightdm.conf
+echo "allow-guest=false" >> /etc/lightdm/lightdm.conf
 #restart lightdm
 
 echo "Dissabling ssh root login"
