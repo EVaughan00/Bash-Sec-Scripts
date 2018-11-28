@@ -1,67 +1,84 @@
 #!/bin/bash
 
+echo "Read Me First!"
+echo
+echo
+echo -e "\033[0;31m"Red"\033[0m = Starting new script section / Starting next function" 
+echo -e "\033[0;34m"Blue"\033[0m = Inter-Function Information" 
+echo -e "\033[1;33m"Yellow"\033[0m = Requires user Input" 
+echo
+echo
+sleep 5
 
-echo "Ready to start Script? (Y/N)"
+
+echo -e "\033[1;33m"Ready To Start Script?"\033[0m (Y/N)"
 read YN
 if [ "$YN" = "Y" ]
 then
-	Starting()
-else 
+	Starting
+else
 	echo "Canceling"
 fi
 
 
 Starting(){
-	echo "Making Lists in tmp dir" 
+	echo -e "\033[0;31m"Making tmp Lists Directory"\033[0m" 
 	sleep 5
 	mkdir /tmp/Lists
+	echo
+	echo -e "\033[0;31m"Manual File Inspection"\033[0m"
 	Manual
+	echo
+	echo -e "\033[0;31m"Performing Updates and Package Installs"\033[0m"
+	sleep 5
+	Updates
+	echo
+	echo -e "\033[0;31m"Installing Scanners and ToolKits"\033[0m"
+	sleep 5
+	Scanners
+	echo
+	echo -e "\033[0;31m"Performing Updates and Package Installs"\033[0m"
 }
 
 Manual(){
-	echo "Manual Edits"
+	echo
+	echo -e "\033[0;34m"Manual Edits"\033[0m"
 	sleep 5
+	#Manual File Inspection
+	gedit /etc/resolv.conf #Make sure Default 8.8.8.8 name server is used 
+	gedit /etc/hosts 
+	gedit /root/.bashrc
+	gedit ~/.bashrc #Check for weird aliases
+	gedit /etc/apt/sources.list | grep -v "#"
+	visudo 
 }
- 
-echo "Sources.list file contents:"
-echo
-cat /etc/apt/sources.list | grep -v "#"
 
-#Manual File Inspection
-gedit /etc/resolv.conf #Make sure Default 8.8.8.8 name server is used 
-gedit /etc/hosts 
-gedit /root/.bashrc
-gedit ~/.bashrc #Check for weird aliases
-visudo
+Updates(){
+	echo
+	echo "Updating"
+	sleep 5
+	apt-get update -y
+	apt-get dist-upgrade -y
+	apt-get install git -y
+	apt-get install vim -y
+}
 
-echo "Continue with updating?"
-read Cont
+Scanners(){
+	echo
+	echo -e "\033[0;34m"Installing and Running Clam"\033[0m"
+	sleep 5
+	apt-get install clamav -y
+	systemctl stop clamav-freshclam
+	freshclam
+	systemctl start clamav-freshclam
+	echo -e "\033[1;33m"Where would you like clam to scan?"\033[0m"
+	read res
+	clamscan -i -r --max-scansize=4000M --max-filesize=4000M ~/$res
+	echo "Clam is Scanning $res"
+}
 
-apt-get update -y
-apt-get dist-upgrade -y
 
-apt-get install git -y
-apt-get install vim -y
 
-echo "Cloning more scripts"
-echo 
-
-cd ~/Documents
-mkdir GIT
-cd GIT
-git clone https://github.com/EVaughan00/Bash-Sec-Scripts
-
-echo "Installing clamav"
-echo
-apt-get install clamav -y
-systemctl stop clamav-freshclam
-freshclam
-echo
-systemctl start clamav-freshclam
-echo "Where would you like clam to scan?"
-read res
-clamscan -i -r --max-scansize=4000M --max-filesize=4000M ~/$res
-echo "Clam is Scanning $res"
 echo "Continue?" 
 read Cont1
 result=`locate cron`
