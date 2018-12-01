@@ -52,6 +52,7 @@ Updates(){
 	apt-get dist-upgrade -y
 	apt-get install git -y
 	apt-get install vim -y
+	apt-get install iptables
 }
 
 Scanners(){
@@ -141,22 +142,60 @@ Networking(){
 	echo
 	netstat -lat
 	echo 
+	sleep 5
 	echo
 	echo "Extended scan"
 	echo
 	ss -ln | grep LISTEN | grep -v 127.0
 	echo 
-}
+	echo -e "\033[1;33m"Press enter to continue"\033[0m (Y/N)" 
+	read next
+	echo -e "\033[1;33m"What services should I take note of? Located in /tmp/Lists/Notes"\033[0m (Y/N)" 
+	echo
+	read S
+	for i in $S
+	do
+		ss -ln | grep $i > /tmp/Lists/Notes.txt
+	done
+	echo -e "\033[1;33m"Which ports should I block?"\033[0m (Y/N)" 
+	read PortList
+	for port in $PortList
+	do
+		/sbin/iptables -A INPUT -p tcp --destination-port $port -j DROP
+		echo -e "\033[0;35m"Blocking $port"\033[0m"
+	done
+	sleep 5
+	
 
-Other(){
-	echo -e "\033[1;33m"Dissable Root Login?"\033[0m (Y/N)"
+}
+Permissions(){
+	echo -e "\033[0;35m"Changing root directoy permissions"\033[0m" 
+	a=("bin" "boot" "dev" "etc" "home" "lib" "lib64" "run" "sbin" "usr" "var" "media" "mnt" "opt" "srv")
+	for i in ${a[@]}
+	do
+	      echo "Changing permissions for $i"
+	      chmod 755 /$i 
+	done
+	echo
+	echo -e "\033[1;33m"Dissable Root and guest Login?"\033[0m (Y/N)"
 	read YesorNo
 	if [ "$YesorNo" = "Y" ]
 	then
 		sed -i 's//bin/bash//usr/sbin/nologin/' /etc/Passwd
+		echo "allow-guest=false" >> /etc/lightdm/lightdm.conf
 	else 
 		echo "Canceling"
 	fi
+	
+	#restart lightdm
+	
+	echo -e "\033[0;35m"Dissabling Root SSH"\033[0m" 
+	echo
+	sed -i 's/PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
+	
+}
+
+Other(){
 	echo
 	echo -e "\033[1;33m"What Users Should I Delete?"\033[0m"
 	read UserDel
@@ -172,6 +211,7 @@ Starting(){
 	echo -e "\033[0;31m"Making tmp Lists Directory"\033[0m" 
 	sleep 5
 	mkdir /tmp/Lists
+	chmod 777 /tmp/Lists
 	echo
 	echo -e "\033[0;31m"Manual File Inspection"\033[0m"
 	Manual
@@ -196,6 +236,10 @@ Starting(){
 	sleep 5
 	Networking	
 	echo
+	echo -e "\033[0;31m"Starting permissions"\033[0m"
+	sleep 5
+	Permissions
+	echo
 	echo -e "\033[0;31m"Starting Other Operations"\033[0m"
 	sleep 5
 	Other
@@ -210,49 +254,6 @@ else
 	echo "Canceling"
 fi
 
-
-echo
-echo "Continue?"
-read Cont2
-
-echo
-
-echo 
-echo "What services should I take note of?"
-echo
-read S
-for i in $S
-do
-ss -ln | grep $i > ./Notes.txt
-done
-echo
-echo "Which ports should I block?"
-read PortList
-for port in $PortList
-do
-/sbin/iptables -A INPUT -p tcp --destination-port $port -j DROP
-done
-
-a=("bin" "boot" "dev" "etc" "home" "lib" "lib64" "run" "sbin" "usr" "var" "media" "mnt" "opt" "srv")
-
-for i in ${a[@]}
-do
-      echo "Changing permissions for $i"
-      chmod 755 /$i 
-done
-
-echo "Continue?"
-read cont5
-echo "dissabling Guest Access (Will also need to restart lightdm)"
-
-echo "allow-guest=false" >> /etc/lightdm/lightdm.conf
-#restart lightdm
-
-echo "Dissabling ssh root login"
-echo
-sed -i 's/PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
-
-echo "Adding maximum password life"
 
 
 
