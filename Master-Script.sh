@@ -22,25 +22,25 @@ Manual(){
 	gedit /etc/hosts 
 	gedit /root/.bashrc
 	gedit ~/.bashrc #Check for weird aliases
-	echo -e "\033[0;34m"Contents of sources.list file"\033[0m"
+	echo -e "\033[0;34m"Contents of sources.list file. Press enter to continue"\033[0m"
 	echo
 	cat /etc/apt/sources.list | grep -v "#"
-	sleep 7
+	read next
 	echo
-	echo -e "\033[0;34m"Contents of sudoers file"\033[0m"
+	echo -e "\033[0;34m"Contents of sudoers file. Press enter to continue"\033[0m"
 	echo
 	cat /etc/sudoers | grep -v "#" 
-	sleep 7
+	read next1
 	echo
-	echo -e "\033[0;34m"Contents of sudoers directory"\033[0m"
+	echo -e "\033[0;34m"Contents of sudoers directory. Press enter to continue."\033[0m"
 	echo
 	ls -al /etc/sudoers.d
-	sleep 7
+	read next2
 	echo
-	echo -e "\033[0;34m"Contents of rc.local"\033[0m"
+	echo -e "\033[0;34m"Contents of rc.local. Press enter to continue"\033[0m"
 	echo
 	cat /etc/rc.local | grep -v "#"
-	sleep 5
+	read next3
 	visudo 
 }
 
@@ -91,7 +91,7 @@ Scanning(){
 	systemctl start clamav-freshclam
 	echo -e "\033[1;33m"Where would you like clam to scan?"\033[0m"
 	read res
-	clamscan -i -r --max-scansize=4000M --max-filesize=4000M ~/$res
+	clamscan -i -r --max-scansize=4000M --max-filesize=4000M ~$res
 	echo -e "\033[0;35m"Clam is Scanning $res"\033[0m" 
 	echo
 	sleep 5
@@ -148,16 +148,16 @@ Networking(){
 	echo
 	ss -ln | grep LISTEN | grep -v 127.0
 	echo 
-	echo -e "\033[1;33m"Press enter to continue"\033[0m (Y/N)" 
+	#echo -e "\033[1;33m"Press enter to continue"\033[0m" 
 	read next
-	echo -e "\033[1;33m"What services should I take note of? Located in /tmp/Lists/Notes"\033[0m (Y/N)" 
+	echo -e "\033[1;33m"What services should I take note of? Located in /tmp/Lists/Notes"\033[0m" 
 	echo
 	read S
 	for i in $S
 	do
 		ss -ln | grep $i > /tmp/Lists/Notes.txt
 	done
-	echo -e "\033[1;33m"Which ports should I block?"\033[0m (Y/N)" 
+	echo -e "\033[1;33m"Which ports should I block?"\033[0m" 
 	read PortList
 	for port in $PortList
 	do
