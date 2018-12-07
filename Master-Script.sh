@@ -208,6 +208,12 @@ Other(){
 }
 	
 Starting(){
+	echo -e "\033[0;31m"Removing aliases"\033[0m" 
+	sleep 5
+	unalias -a 
+	echo "unalias -a" >> ~/.bashrc
+	echo "unalias -a" >> /root/.bashrc
+	echo
 	echo -e "\033[0;31m"Making tmp Lists Directory"\033[0m" 
 	sleep 5
 	mkdir /tmp/Lists
