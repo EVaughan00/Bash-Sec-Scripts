@@ -22,10 +22,9 @@ Manual(){
 	gedit /etc/hosts 
 	gedit /root/.bashrc
 	gedit ~/.bashrc #Check for weird aliases
-	echo -e "\033[0;34m"Contents of sources.list file. Press enter to continue"\033[0m"
-	echo
-	cat /etc/apt/sources.list | grep -v "#"
-	read next
+	echo deb http://security.ubuntu.com/ubuntu trusty-security universe >> /etc/apt/sources.list
+	echo deb-src http://security.ubuntu.com/ubuntu trusty-security universe >> /etc/apt/sources.list
+	gedit /etc/apt/sources.list
 	echo
 	echo -e "\033[0;34m"Contents of sudoers file. Press enter to continue"\033[0m"
 	echo
@@ -46,13 +45,22 @@ Manual(){
 
 Updates(){
 	echo
-	echo "Updating"
+	echo -e "\033[1;33m"reinstall systemd?"\033[0m (Y/N)" 
+	read YorN
+
+	if [ "$YorN" = "Y" ]
+	then
+		apt-get install systemd -y
+	else 
+		echo "Canceling"
+	fi
 	sleep 5
 	apt-get update -y
 	apt-get dist-upgrade -y
 	apt-get install git -y
 	apt-get install vim -y
 	apt-get install iptables
+	
 }
 
 Scanners(){
