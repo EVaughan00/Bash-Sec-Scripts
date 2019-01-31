@@ -200,7 +200,16 @@ Permissions(){
 	echo -e "\033[0;35m"Dissabling Root SSH"\033[0m" 
 	echo
 	sed -i 's/PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
+	sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin no/' /etc/ssh/sshd_config
+	sed -i 's/PermitRootLogin without-password/PermitRootLogin no/' /etc/ssh/sshd_config
+	sed -i 's/IgnoreRhosts no/IgnoreRhosts yes/' /etc/ssh/sshd_config
+	sed -i 's/PermitEmptyPasswords yes/PermitEmptyPasswords no/' /etc/ssh/sshd_config
 	
+}
+Passwords(){
+	sed -i 's/PASS_MAX_DAYS\t99999/PASS_MAX_DAYS\t90/' /etc/login.defs
+	sed -i 's/PASS_MIN_DAYS\t0/PASS_MIN_DAYS\t30/' /etc/login.defs
+	sed -i '/sha512/s/$/ \npassword requisite pam_cracklib.so retry=3 minlen=10 difok=3 ucredit=-1 lcredit=-1 dcredit=-1  ocredit=-1/' /etc/pam.d/common-password
 }
 
 Other(){
@@ -253,6 +262,10 @@ Starting(){
 	echo -e "\033[0;31m"Starting permissions"\033[0m"
 	sleep 5
 	Permissions
+	echo
+	echo -e "\033[0;31m"Starting Password Security"\033[0m"
+	sleep 5
+	Passwords	
 	echo
 	echo -e "\033[0;31m"Starting Other Operations"\033[0m"
 	sleep 5
