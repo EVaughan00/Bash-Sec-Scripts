@@ -89,8 +89,28 @@ CronHunt(){
 	read a
 	for i in $a
 	do
-	crontab -u $i -l | grep -v "#" > /tmp/Lists/ListofCrons
+		crontab -u $i -l | grep -v "#" > /tmp/Lists/ListofCrons
 	done
+	echo -e "\033[0;34m"Searching Logs for Cron Activity"\033[0m"
+	sleep 5
+	echo
+	echo -e "\033[0;34m"Auth Log crons. Press enter to continue"\033[0m"
+	cat /var/log/auth.log | grep cron
+	read cont
+	echo
+	echo -e "\033[0;34m"Syslog crons. Press enter to continue"\033[0m"
+	cat /var/log/syslog | grep cron
+	read cont2
+	echo
+	echo -e "\033[0;34m"Installed Hacking Packages. See /tmp/Lists/full-install-list.log for full list. Press enter to continue"\033[0m"
+	grep -w install /var/log/dpkg.log > /tmp/Lists/full-install-list.log
+	mal=(hydra john zenmap nmap ripper crack rainbow .mp3 mp3 Kismet Freeciv Ophcrack netcat cron crontab anacron)
+	for z in ${mal[@]}
+	do
+		grep -w install /var/log/dpkg.log | grep $z >> /tmp/Lists/malware.txt
+	done
+	sleep 5
+	
 }
 
 Scanning(){
@@ -112,7 +132,20 @@ Scanning(){
 		find . *"$i" > /tmp/Lists/malwareMore.txt
 	done
 	echo
+	echo -e "\033[0;35m"Scanning with rkhunter"\033[0m"
 	sleep 5
+	echo
+	rkhunter -c
+	echo -e "\033[1;33m"Check rkhunter Log?"\033[0m (Y/N)"
+	read YorN
+	if [ "$YorN" = "Y" ]
+	then
+		sudo gedit /var/log/rkhunter.log
+	else 
+		echo "Canceling"
+	fi
+	sleep 5
+	echo
 	echo -e "\033[0;34m"Listing users with 0 IDs"\033[0m"
 	echo
 	cat /etc/passwd | grep ":0:" 
@@ -189,16 +222,20 @@ Permissions(){
 	read YesorNo
 	if [ "$YesorNo" = "Y" ]
 	then
-		sed -i 's//bin/bash//usr/sbin/nologin/' /etc/Passwd
+		cp /etc/passwd /tmp/Backups/passwd.bak
+		cp /etc/lightdm/lightdm.conf /tmp/Backups/lightdm.conf
+		sed -i 's/root:\/bin\/bash/root:\/usr\/sbin\/nologin/' /etc/passwd
 		echo "allow-guest=false" >> /etc/lightdm/lightdm.conf
 	else 
 		echo "Canceling"
 	fi
 	
 	#restart lightdm
-	
+	echo -e "\033[0;35m"Copying common-password to tmp"\033[0m"
+	sleep 5
 	echo -e "\033[0;35m"Dissabling Root SSH"\033[0m" 
 	echo
+	cp /etc/ssh/sshd_config /tmp/Backups/sshd_config.bak
 	sed -i 's/PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
 	sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin no/' /etc/ssh/sshd_config
 	sed -i 's/PermitRootLogin without-password/PermitRootLogin no/' /etc/ssh/sshd_config
@@ -207,9 +244,14 @@ Permissions(){
 	
 }
 Passwords(){
+	echo -e "\033[0;35m"Copying common-password to tmp"\033[0m"
+	sleep 5
+	cp /etc/pam.d/common-password /tmp/Backups/common-password.bak
 	sed -i 's/PASS_MAX_DAYS\t99999/PASS_MAX_DAYS\t90/' /etc/login.defs
 	sed -i 's/PASS_MIN_DAYS\t0/PASS_MIN_DAYS\t30/' /etc/login.defs
-	sed -i '/obscure sha512/s/$/ \npassword requisite pam_cracklib.so retry=3 minlen=10 difok=3 ucredit=-1 lcredit=-1 dcredit=-1  ocredit=-1/' /etc/pam.d/common-password
+	sed -i '/obscure sha512/s/$/ use_authtok/' /etc/pam.d/common-password
+	sed -i '/(the "Primary" block)/s/$/ \npassword\trequired\t pam_pwhistory.so  remember=5/' /etc/pam.d/common-password
+	sed -i '/use_authtok/s/$/ \npassword\trequisite\tpam_cracklib.so retry=3 minlen=10 difok=3 ucredit=-1 lcredit=-1 dcredit=-1  ocredit=-1/' /etc/pam.d/common-password
 }
 
 Other(){
@@ -234,7 +276,9 @@ Starting(){
 	echo -e "\033[0;31m"Making tmp Lists Directory"\033[0m" 
 	sleep 5
 	mkdir /tmp/Lists
+	mkdir /tmp/Backups
 	chmod 777 /tmp/Lists
+	chmod 777 /tmp/Backups
 	echo
 	echo -e "\033[0;31m"Manual File Inspection"\033[0m"
 	Manual
