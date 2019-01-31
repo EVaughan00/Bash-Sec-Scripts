@@ -163,9 +163,11 @@ Networking(){
 	echo -e "\033[0;35m"Enabling Ufw"\033[0m" 
 	ufw enable 
 	echo
+	sed -i 's/#net.ipv4.conf.all.send_redirects = 0/net.ipv4.conf.all.send_redirects = 0/' /etc/sysctl.conf
 	echo -e "\033[0;35m"Enabling cookie protection"\033[0m" 
 	sleep 5
 	sysctl -n net.ipv4.tcp_syncookies	
+	sed -i 's/#net.ipv4.tcp_syncookies=1/net.ipv4.tcp_syncookies=1/' /etc/sysctl.conf
 	echo 
 	echo -e "\033[0;35m"Dissabling IPv4 forwarding"\033[0m" 
 	sudo echo 0 > /proc/sys/net/ipv4/ip_forward
@@ -232,7 +234,7 @@ Permissions(){
 	fi
 	
 	#restart lightdm
-	echo -e "\033[0;35m"Copying common-password to tmp"\033[0m"
+	echo -e "\033[0;35m"Copying sshd_config to tmp backups"\033[0m"
 	sleep 5
 	echo -e "\033[0;35m"Dissabling Root SSH"\033[0m" 
 	echo
@@ -245,14 +247,17 @@ Permissions(){
 	
 }
 Passwords(){
-	echo -e "\033[0;35m"Copying common-password to tmp"\033[0m"
+	echo -e "\033[0;35m"Copying common-password and common-auth to tmp backups"\033[0m"
 	sleep 5
 	cp /etc/pam.d/common-password /tmp/Backups/common-password.bak
+	cp /etc/pam.d/common-auth /tmp/Backups/common-auth.bak
 	sed -i 's/PASS_MAX_DAYS\t99999/PASS_MAX_DAYS\t90/' /etc/login.defs
 	sed -i 's/PASS_MIN_DAYS\t0/PASS_MIN_DAYS\t30/' /etc/login.defs
 	sed -i '/obscure sha512/s/$/ use_authtok/' /etc/pam.d/common-password
 	sed -i '/(the "Primary" block)/s/$/ \npassword\trequired\t pam_pwhistory.so  remember=5/' /etc/pam.d/common-password
 	sed -i '/use_authtok/s/$/ \npassword\trequisite\tpam_cracklib.so retry=3 minlen=10 difok=3 ucredit=-1 lcredit=-1 dcredit=-1  ocredit=-1/' /etc/pam.d/common-password
+	sed -i 's/requisite/required/' /etc/pam.d/common-auth
+	sed -i '/pam_deny.so/s/$/ \nauth\trequired\tpam_tally2.so\tonerr=fail deny=3 unlock_time=1800/' /etc/pam.d/common-auth
 }
 
 Other(){
@@ -265,6 +270,8 @@ Other(){
 		 groupdel $i
 	done
 	echo "exit 0" >> /etc/rc.local
+	cp /etc/fstab /tmp/Backups/fstab.bak
+	echo 'none /run/shm tmpfs defaults,ro 0 0' >> /etc/fstab
 }
 	
 Starting(){
