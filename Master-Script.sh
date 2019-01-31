@@ -59,7 +59,7 @@ Updates(){
 	apt-get dist-upgrade -y
 	apt-get install git -y
 	apt-get install vim -y
-	apt-get install iptables
+	apt-get install iptables -y
 	
 }
 
@@ -225,7 +225,8 @@ Permissions(){
 		cp /etc/passwd /tmp/Backups/passwd.bak
 		cp /etc/lightdm/lightdm.conf /tmp/Backups/lightdm.conf
 		sed -i 's/root:\/bin\/bash/root:\/usr\/sbin\/nologin/' /etc/passwd
-		echo "allow-guest=false" >> /etc/lightdm/lightdm.conf
+		mkdir /etc/lightdm/lightdm.conf.d
+		sh -c 'printf "[SeatDefaults]\nallow-guest=false\n" > /etc/lightdm/lightdm.conf.d/50-no-guest.conf'
 	else 
 		echo "Canceling"
 	fi
