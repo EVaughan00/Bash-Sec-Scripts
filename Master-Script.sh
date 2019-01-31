@@ -209,7 +209,7 @@ Permissions(){
 Passwords(){
 	sed -i 's/PASS_MAX_DAYS\t99999/PASS_MAX_DAYS\t90/' /etc/login.defs
 	sed -i 's/PASS_MIN_DAYS\t0/PASS_MIN_DAYS\t30/' /etc/login.defs
-	sed -i '/sha512/s/$/ \npassword requisite pam_cracklib.so retry=3 minlen=10 difok=3 ucredit=-1 lcredit=-1 dcredit=-1  ocredit=-1/' /etc/pam.d/common-password
+	sed -i '/obscure sha512/s/$/ \npassword requisite pam_cracklib.so retry=3 minlen=10 difok=3 ucredit=-1 lcredit=-1 dcredit=-1  ocredit=-1/' /etc/pam.d/common-password
 }
 
 Other(){
