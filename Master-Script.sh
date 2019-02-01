@@ -262,9 +262,9 @@ Permissions(){
 	sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin no/' /etc/ssh/sshd_config
 	sed -i 's/PermitRootLogin without-password/PermitRootLogin no/' /etc/ssh/sshd_config
 	sed -i 's/IgnoreRhosts no/IgnoreRhosts yes/' /etc/ssh/sshd_config
-	sed -i 's/PermitEmptyPasswords yes/PermitEmptyPasswords no/' /etc/ssh/sshd_config
-	
+	sed -i 's/PermitEmptyPasswords yes/PermitEmptyPasswords no/' /etc/ssh/sshd_config	
 }
+
 Passwords(){
 	echo -e "\033[0;35m"Copying common-password and common-auth to tmp backups"\033[0m"
 	sleep 5
@@ -277,6 +277,31 @@ Passwords(){
 	sed -i '/use_authtok/s/$/ \npassword\trequisite\tpam_cracklib.so retry=3 minlen=10 difok=3 ucredit=-1 lcredit=-1 dcredit=-1  ocredit=-1/' /etc/pam.d/common-password
 	sed -i 's/requisite/required/' /etc/pam.d/common-auth
 	sed -i '/pam_deny.so/s/$/ \nauth\trequired\tpam_tally2.so\tonerr=fail deny=3 unlock_time=1800/' /etc/pam.d/common-auth
+}
+
+Services () {
+	echo -e "\033[0;35m"Listing active services and sending them to /tmp/Lists/servicesList."\033[0m" 
+	sleep 5
+	echo
+	service --status-all | grep + | cut -d " " -f6 | tee /tmp/Lists/servicesList
+	sleep 5
+	echo -e "\033[0;35m"Listing all services. Purge any that are not necessary. Press enter to continue."\033[0m" 
+	echo
+	read cont
+	echo -e "\033[1;33m"What services should I purge?"\033[0m (Y/N)"
+	read input
+	for i in ${input[@]}
+	do
+		apt-get purge $i -y
+		apt-get autoremove $i -y
+	done
+	echo
+	echo -e "\033[1;33m"What services should I update?"\033[0m (Y/N)"
+	read input1
+	for z in ${input1[@]}
+	do
+		apt-get install $z -y
+	done
 }
 
 Other(){
