@@ -60,6 +60,7 @@ Updates(){
 	apt-get install -f -y
 	apt-get install git -y
 	apt-get install vim -y
+	apt-get install libpam-cracklib -y
 	apt-get install iptables -y
 	apt-get autoclean -y
 	apt-get autoremove -y
@@ -161,20 +162,20 @@ Scanning(){
 	sleep 7
 	echo -e "\033[0;34m"Scanning for unnecessary files. Putting them in /tmp/Lists/allUnnecessaryFiles. Press enter to continue."\033[0m"
 	find / -name '*.mov' -type f 2>/dev/null | tee /tmp/Lists/allUnnecessaryFiles
-	find / -name '*.mp3' -type f 2>/dev/null | tee /tmp/Lists/allUnnecessaryFiles
-	find / -name '*.mp4' -type f 2>/dev/null | tee /tmp/Lists/allUnnecessaryFiles
-	find / -name '*.flv' -type f 2>/dev/null | tee /tmp/Lists/allUnnecessaryFiles
-	find / -name '*.flac' -type f 2>/dev/null | tee /tmp/Lists/allUnnecessaryFiles
-	find / -name '*.m4a' -type f 2>/dev/null | tee /tmp/Lists/allUnnecessaryFiles
-	find / -name '*.png' -type f 2>/dev/null | tee /tmp/Lists/allUnnecessaryFiles
-	find / -name '*.gif' -type f 2>/dev/null | tee /tmp/Lists/allUnnecessaryFiles
-	find / -name '*.jpg' -type f 2>/dev/null | tee /tmp/Lists/allUnnecessaryFiles
-	find / -name '*.jpeg' -type f 2>/dev/null | tee /tmp/Lists/allUnnecessaryFiles
-	find / -name '*.mpg' -type f 2>/dev/null | tee /tmp/Lists/allUnnecessaryFiles
-	find / -name '*.mpeg' -type f 2>/dev/null | tee /tmp/Lists/allUnnecessaryFiles
-	find / -name '*.ogg' -type f 2>/dev/null | tee /tmp/Lists/allUnnecessaryFiles
-	find / -name '*.png' -type f 2>/dev/null | tee /tmp/Lists/allUnnecessaryFiles
-	find / -name '*.avi' -type f 2>/dev/null | tee /tmp/Lists/allUnnecessaryFiles
+	find / -name '*.mp3' -type f 2>/dev/null | tee -a /tmp/Lists/allUnnecessaryFiles
+	find / -name '*.mp4' -type f 2>/dev/null | tee -a /tmp/Lists/allUnnecessaryFiles
+	find / -name '*.flv' -type f 2>/dev/null | tee -a /tmp/Lists/allUnnecessaryFiles
+	find / -name '*.flac' -type f 2>/dev/null | tee -a /tmp/Lists/allUnnecessaryFiles
+	find / -name '*.m4a' -type f 2>/dev/null | tee -a /tmp/Lists/allUnnecessaryFiles
+	find / -name '*.png' -type f 2>/dev/null | tee -a /tmp/Lists/allUnnecessaryFiles
+	find / -name '*.gif' -type f 2>/dev/null | tee -a /tmp/Lists/allUnnecessaryFiles
+	find / -name '*.jpg' -type f 2>/dev/null | tee -a /tmp/Lists/allUnnecessaryFiles
+	find / -name '*.jpeg' -type f 2>/dev/null | tee -a /tmp/Lists/allUnnecessaryFiles
+	find / -name '*.mpg' -type f 2>/dev/null | tee -a /tmp/Lists/allUnnecessaryFiles
+	find / -name '*.mpeg' -type f 2>/dev/null | tee -a /tmp/Lists/allUnnecessaryFiles
+	find / -name '*.ogg' -type f 2>/dev/null | tee -a /tmp/Lists/allUnnecessaryFiles
+	find / -name '*.png' -type f 2>/dev/null | tee -a /tmp/Lists/allUnnecessaryFiles
+	find / -name '*.avi' -type f 2>/dev/null | tee -a /tmp/Lists/allUnnecessaryFiles
 	read cont
 }
 
@@ -227,7 +228,6 @@ Networking(){
 		echo -e "\033[0;35m"Blocking $port"\033[0m"
 	done
 	sleep 5
-	
 
 }
 Permissions(){
@@ -238,13 +238,21 @@ Permissions(){
 	      echo "Changing permissions for $i"
 	      chmod 755 /$i 
 	done
+	echo -e "\033[0;35m"Finding world writable directories"\033[0m" 
+	sleep 2
+	find / -type d \( -perm -g+w -or -perm -o+w \) -exec ls -adl {} \; | tee /tmp/Lists/worldWritableDirs
+	sleep 5
+	echo
+	echo -e "\033[0;35m"Finding world writable files"\033[0m" 
+	sleep 2
+	find / -perm -0002 -type f -print | grep -v proc | tee /tmp/Lists/worldWritableFiles
+	sleep 5
 	echo
 	echo -e "\033[1;33m"Dissable Root and guest Login?"\033[0m (Y/N)"
 	read YesorNo
 	if [ "$YesorNo" = "Y" ]
 	then
 		cp /etc/passwd /tmp/Backups/passwd.bak
-		cp /etc/lightdm/lightdm.conf /tmp/Backups/lightdm.conf
 		sed -i 's/root:\/bin\/bash/root:\/usr\/sbin\/nologin/' /etc/passwd
 		mkdir /etc/lightdm/lightdm.conf.d
 		sh -c 'printf "[SeatDefaults]\nallow-guest=false\n" > /etc/lightdm/lightdm.conf.d/50-no-guest.conf'
@@ -271,7 +279,7 @@ Passwords(){
 	cp /etc/pam.d/common-password /tmp/Backups/common-password.bak
 	cp /etc/pam.d/common-auth /tmp/Backups/common-auth.bak
 	sed -i 's/PASS_MAX_DAYS\t99999/PASS_MAX_DAYS\t90/' /etc/login.defs
-	sed -i 's/PASS_MIN_DAYS\t0/PASS_MIN_DAYS\t30/' /etc/login.defs
+	sed -i 's/PASS_MIN_DAYS\t0/PASS_MIN_DAYS\t7/' /etc/login.defs
 	sed -i '/obscure sha512/s/$/ use_authtok/' /etc/pam.d/common-password
 	sed -i '/(the "Primary" block)/s/$/ \npassword\trequired\t pam_pwhistory.so  remember=5/' /etc/pam.d/common-password
 	sed -i '/use_authtok/s/$/ \npassword\trequisite\tpam_cracklib.so retry=3 minlen=10 difok=3 ucredit=-1 lcredit=-1 dcredit=-1  ocredit=-1/' /etc/pam.d/common-password
@@ -284,11 +292,12 @@ Services () {
 	sleep 5
 	echo
 	service --status-all | grep + | cut -d " " -f6 | tee /tmp/Lists/servicesList
-	sleep 5
 	echo -e "\033[0;35m"Listing all services. Purge any that are not necessary. Press enter to continue."\033[0m" 
+	sleep 5
 	echo
+	service --status-all
 	read cont
-	echo -e "\033[1;33m"What services should I purge?"\033[0m (Y/N)"
+	echo -e "\033[1;33m"What services should I purge?"\033[0m"
 	read input
 	for i in ${input[@]}
 	do
@@ -296,7 +305,7 @@ Services () {
 		apt-get autoremove $i -y
 	done
 	echo
-	echo -e "\033[1;33m"What services should I update?"\033[0m (Y/N)"
+	echo -e "\033[1;33m"What services should I update?"\033[0m"
 	read input1
 	for z in ${input1[@]}
 	do
@@ -315,7 +324,7 @@ Other(){
 	done
 	echo "exit 0" >> /etc/rc.local
 	cp /etc/fstab /tmp/Backups/fstab.bak
-	echo 'none /run/shm tmpfs defaults,ro 0 0' >> /etc/fstab
+	echo 'tmpfs /run/shm tmpfs defaults,noexec,nosuid 0 0' >> /etc/fstab
 }
 	
 Starting(){
@@ -361,7 +370,11 @@ Starting(){
 	echo
 	echo -e "\033[0;31m"Starting Password Security"\033[0m"
 	sleep 5
-	Passwords	
+	Passwords
+	echo
+	echo -e "\033[0;31m"Starting Service Security"\033[0m"
+	sleep 5
+	Services
 	echo
 	echo -e "\033[0;31m"Starting Other Operations"\033[0m"
 	sleep 5
