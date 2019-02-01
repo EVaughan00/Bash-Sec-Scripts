@@ -72,9 +72,10 @@ Scanners(){
 	sleep 5
 	apt-get install clamav -y
 	echo
-	echo -e "\033[0;34m"Installing rkhunter"\033[0m"
+	echo -e "\033[0;34m"Installing rkhunter and chkrootkit"\033[0m"
 	sleep 5
 	apt-get install rkhunter -y
+	apt-get install chkrootkit -y
 	rkhunter --update
 	rkhunter --propupd
 }
@@ -105,12 +106,12 @@ CronHunt(){
 	cat /var/log/syslog | grep cron
 	read cont2
 	echo
-	echo -e "\033[0;34m"Installed Hacking Packages. See /tmp/Lists/full-install-list.log for full list. Press enter to continue"\033[0m"
+	echo -e "\033[0;34m"Installed prohibited packages. See /tmp/Lists/full-install-list.log for full list. Press enter to continue"\033[0m"
 	grep -w install /var/log/dpkg.log > /tmp/Lists/full-install-list.log
 	mal=(hydra john zenmap nmap ripper crack rainbow .mp3 mp3 Kismet Freeciv Ophcrack netcat cron crontab anacron)
 	for z in ${mal[@]}
 	do
-		grep -w install /var/log/dpkg.log | grep $z >> /tmp/Lists/malware.txt
+		grep -w install /var/log/dpkg.log | grep $z | tee -a /tmp/Lists/malware.txt
 	done
 	sleep 5
 	
@@ -122,7 +123,7 @@ Scanning(){
 	systemctl start clamav-freshclam
 	echo -e "\033[1;33m"Where would you like clam to scan?"\033[0m"
 	read res
-	clamscan -i -r --max-scansize=4000M --max-filesize=4000M ~$res
+	clamscan -i -r --max-scansize=4000M --max-filesize=4000M $res
 	echo -e "\033[0;35m"Clam is Scanning $res"\033[0m" 
 	echo
 	sleep 5
@@ -138,7 +139,7 @@ Scanning(){
 	echo -e "\033[0;35m"Scanning with rkhunter"\033[0m"
 	sleep 5
 	echo
-	rkhunter -c
+	rkhunter -c --enable all --disable none
 	echo -e "\033[1;33m"Check rkhunter Log?"\033[0m (Y/N)"
 	read YorN
 	if [ "$YorN" = "Y" ]
@@ -148,7 +149,11 @@ Scanning(){
 		echo "Canceling"
 	fi
 	sleep 5
+	echo -e "\033[0;35m"Scanning with chkrootkit. Press enter to continue"\033[0m"
+	sleep 2
+	chkrootkit -q
 	echo
+	read continue1
 	echo -e "\033[0;34m"Listing users with 0 IDs"\033[0m"
 	echo
 	cat /etc/passwd | grep ":0:" 
@@ -228,7 +233,10 @@ Networking(){
 		echo -e "\033[0;35m"Blocking $port"\033[0m"
 	done
 	sleep 5
-
+	echo -e "\033[0;35m"Turning nospoof on"\033[0m" 
+	sed -i 's/order hosts,bind/order bind,hosts/' /etc/host.conf
+	sed -i 's/multi on/nospoof on/' /etc/host.conf
+	sleep 2
 }
 Permissions(){
 	echo -e "\033[0;35m"Changing root directoy permissions"\033[0m" 
@@ -389,9 +397,3 @@ then
 else
 	echo "Canceling"
 fi
-
-
-
-
-
-
