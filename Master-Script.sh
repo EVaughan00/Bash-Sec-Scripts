@@ -57,10 +57,12 @@ Updates(){
 	sleep 5
 	apt-get update -y
 	apt-get dist-upgrade -y
+	apt-get install -f -y
 	apt-get install git -y
 	apt-get install vim -y
 	apt-get install iptables -y
-	
+	apt-get autoclean -y
+	apt-get autoremove -y
 }
 
 Scanners(){
@@ -157,6 +159,23 @@ Scanning(){
 	cat /etc/passwd | grep -w "login"
 	echo
 	sleep 7
+	echo -e "\033[0;34m"Scanning for unnecessary files. Putting them in /tmp/Lists/allUnnecessaryFiles. Press enter to continue."\033[0m"
+	find / -name '*.mov' -type f 2>/dev/null | tee /tmp/Lists/allUnnecessaryFiles
+	find / -name '*.mp3' -type f 2>/dev/null | tee /tmp/Lists/allUnnecessaryFiles
+	find / -name '*.mp4' -type f 2>/dev/null | tee /tmp/Lists/allUnnecessaryFiles
+	find / -name '*.flv' -type f 2>/dev/null | tee /tmp/Lists/allUnnecessaryFiles
+	find / -name '*.flac' -type f 2>/dev/null | tee /tmp/Lists/allUnnecessaryFiles
+	find / -name '*.m4a' -type f 2>/dev/null | tee /tmp/Lists/allUnnecessaryFiles
+	find / -name '*.png' -type f 2>/dev/null | tee /tmp/Lists/allUnnecessaryFiles
+	find / -name '*.gif' -type f 2>/dev/null | tee /tmp/Lists/allUnnecessaryFiles
+	find / -name '*.jpg' -type f 2>/dev/null | tee /tmp/Lists/allUnnecessaryFiles
+	find / -name '*.jpeg' -type f 2>/dev/null | tee /tmp/Lists/allUnnecessaryFiles
+	find / -name '*.mpg' -type f 2>/dev/null | tee /tmp/Lists/allUnnecessaryFiles
+	find / -name '*.mpeg' -type f 2>/dev/null | tee /tmp/Lists/allUnnecessaryFiles
+	find / -name '*.ogg' -type f 2>/dev/null | tee /tmp/Lists/allUnnecessaryFiles
+	find / -name '*.png' -type f 2>/dev/null | tee /tmp/Lists/allUnnecessaryFiles
+	find / -name '*.avi' -type f 2>/dev/null | tee /tmp/Lists/allUnnecessaryFiles
+	read cont
 }
 
 Networking(){
